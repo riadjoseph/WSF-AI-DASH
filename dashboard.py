@@ -18,22 +18,37 @@ st.set_page_config(
 
 @st.cache_data
 def load_data(sample_size=None):
-    """Load data from Google Drive"""
+    """Load data from Dropbox"""
     try:
         import requests
         import io
         
-        # Google Drive file ID extracted from your URL
-        file_id = "14DnEEj8ZEQ1hFN6s62ehZdeBa84Xw9W5"
-        download_url = f"https://drive.google.com/uc?id={file_id}&export=download"
+        # Dropbox direct download URL
+        dropbox_url = "https://www.dropbox.com/scl/fi/bbe8usqrwsg3me45jvmci/combined_SOS_info_with_brand_country_fixed.parquet?rlkey=953adxassl380kxowdazh4b0v&st=x2d70pzn&dl=1"
         
         # Download the file
-        with st.spinner("Downloading data from Google Drive..."):
-            response = requests.get(download_url)
+        with st.spinner("Downloading data from Dropbox (this may take 1-2 minutes)..."):
+            response = requests.get(dropbox_url, stream=True)
             response.raise_for_status()  # Raise an exception for bad status codes
             
+            # Check content type and size
+            content_type = response.headers.get('content-type', '')
+            content_length = response.headers.get('content-length', 'Unknown')
+            
+            if 'text/html' in content_type:
+                st.error("⚠️ Dropbox returned an HTML page instead of the file.")
+                st.error("Please check that the Dropbox URL ends with '&dl=1' for direct download.")
+                return pd.DataFrame()
+            
+            # Load parquet from response content
+            content = response.content
+            if len(content) < 1000:  # Too small to be our parquet file
+                st.error(f"⚠️ Downloaded file is too small ({len(content)} bytes).")
+                st.error("Please check the Dropbox sharing settings and URL.")
+                return pd.DataFrame()
+                
         # Load parquet from bytes
-        df = pd.read_parquet(io.BytesIO(response.content))
+        df = pd.read_parquet(io.BytesIO(content))
         
         # Basic data cleaning
         df = df.dropna(subset=['brand', 'country', 'AI Overview presence'])
@@ -366,9 +381,9 @@ def main():
     # Sidebar for controls
     st.sidebar.header("Dashboard Controls")
     
-    # Always load full dataset from Google Drive
+    # Always load full dataset from Dropbox
     st.sidebar.info("📊 Loading full dataset (15.3M records)")
-    st.sidebar.info("☁️ Data loaded from Google Drive")
+    st.sidebar.info("📦 Data loaded from Dropbox")
     st.sidebar.info("⏳ Initial load may take 1-2 minutes")
     
     # Load data
