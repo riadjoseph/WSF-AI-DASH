@@ -328,6 +328,234 @@ def create_serp_features_analysis(df):
     fig.update_layout(height=500, showlegend=False, xaxis_tickangle=-45)
     return fig, serp_ai
 
+def create_sos_query_type_analysis(df):
+    """Create analysis by SOS_query_type - both calculations"""
+    if 'SOS_query_type' not in df.columns:
+        return None, None, None
+    
+    # Calculation 1: AI Overview rate per query type
+    query_type_rates = df.groupby('SOS_query_type').agg({
+        'AI Overview presence': ['count', 'sum']
+    }).round(2)
+    
+    query_type_rates.columns = ['Total_Records', 'AI_Present_Count']
+    query_type_rates['AI_Rate_Percent'] = (query_type_rates['AI_Present_Count'] / query_type_rates['Total_Records'] * 100).round(2)
+    query_type_rates = query_type_rates.reset_index().sort_values('AI_Rate_Percent', ascending=False)
+    
+    # Calculation 2: AI Overview distribution
+    ai_only_df = df[df['AI Overview presence'] == True]
+    query_type_distribution = ai_only_df['SOS_query_type'].value_counts(normalize=True) * 100
+    query_type_distribution_df = query_type_distribution.reset_index()
+    query_type_distribution_df.columns = ['SOS_query_type', 'AI_Distribution_Percent']
+    query_type_distribution_df['AI_Distribution_Percent'] = query_type_distribution_df['AI_Distribution_Percent'].round(1)
+    
+    # Merge both calculations
+    query_type_combined = query_type_rates.merge(query_type_distribution_df, on='SOS_query_type', how='left')
+    
+    # Create visualizations
+    fig1 = px.bar(
+        query_type_rates,
+        x='SOS_query_type',
+        y='AI_Rate_Percent',
+        title="AI Overview Rate by SOS Query Type<br><sub>What % of each query type's records have AI Overview</sub>",
+        color='AI_Rate_Percent',
+        color_continuous_scale='Blues',
+        text='AI_Rate_Percent'
+    )
+    fig1.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+    fig1.update_layout(height=400, showlegend=False)
+    
+    fig2 = px.bar(
+        query_type_distribution_df,
+        x='SOS_query_type',
+        y='AI_Distribution_Percent',
+        title="AI Overview Distribution by SOS Query Type<br><sub>Of all AI Overview records, what % belong to each query type</sub>",
+        color='AI_Distribution_Percent',
+        color_continuous_scale='Greens', 
+        text='AI_Distribution_Percent'
+    )
+    fig2.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+    fig2.update_layout(height=400, showlegend=False)
+    
+    return fig1, fig2, query_type_combined
+
+def create_sos_category_analysis(df):
+    """Create analysis by SOS_category - both calculations"""
+    if 'SOS_category' not in df.columns:
+        return None, None, None
+    
+    # Calculation 1: AI Overview rate per category
+    category_rates = df.groupby('SOS_category').agg({
+        'AI Overview presence': ['count', 'sum']
+    }).round(2)
+    
+    category_rates.columns = ['Total_Records', 'AI_Present_Count']
+    category_rates['AI_Rate_Percent'] = (category_rates['AI_Present_Count'] / category_rates['Total_Records'] * 100).round(2)
+    category_rates = category_rates.reset_index().sort_values('AI_Rate_Percent', ascending=False)
+    
+    # Calculation 2: AI Overview distribution
+    ai_only_df = df[df['AI Overview presence'] == True]
+    category_distribution = ai_only_df['SOS_category'].value_counts(normalize=True) * 100
+    category_distribution_df = category_distribution.reset_index()
+    category_distribution_df.columns = ['SOS_category', 'AI_Distribution_Percent']
+    category_distribution_df['AI_Distribution_Percent'] = category_distribution_df['AI_Distribution_Percent'].round(1)
+    
+    # Merge both calculations
+    category_combined = category_rates.merge(category_distribution_df, on='SOS_category', how='left')
+    
+    # Create visualizations
+    fig1 = px.bar(
+        category_rates,
+        x='SOS_category',
+        y='AI_Rate_Percent',
+        title="AI Overview Rate by SOS Category<br><sub>What % of each category's records have AI Overview</sub>",
+        color='AI_Rate_Percent',
+        color_continuous_scale='Reds',
+        text='AI_Rate_Percent'
+    )
+    fig1.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+    fig1.update_layout(height=400, showlegend=False, xaxis_tickangle=-45)
+    
+    fig2 = px.bar(
+        category_distribution_df,
+        x='SOS_category',
+        y='AI_Distribution_Percent',
+        title="AI Overview Distribution by SOS Category<br><sub>Of all AI Overview records, what % belong to each category</sub>",
+        color='AI_Distribution_Percent',
+        color_continuous_scale='Oranges',
+        text='AI_Distribution_Percent'
+    )
+    fig2.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+    fig2.update_layout(height=400, showlegend=False, xaxis_tickangle=-45)
+    
+    return fig1, fig2, category_combined
+
+def create_sos_territory_analysis(df):
+    """Create analysis by SOS_territory - handles pipe-separated values"""
+    if 'SOS_territory' not in df.columns:
+        return None, None, None
+    
+    # Expand pipe-separated territories
+    expanded_rows = []
+    for _, row in df.iterrows():
+        territories = str(row['SOS_territory']).split('|') if pd.notna(row['SOS_territory']) else ['Unknown']
+        for territory in territories:
+            territory = territory.strip()
+            if territory:  # Skip empty strings
+                new_row = row.copy()
+                new_row['SOS_territory_expanded'] = territory
+                expanded_rows.append(new_row)
+    
+    if not expanded_rows:
+        return None, None, None
+        
+    expanded_df = pd.DataFrame(expanded_rows)
+    
+    # Calculation 1: AI Overview rate per territory
+    territory_rates = expanded_df.groupby('SOS_territory_expanded').agg({
+        'AI Overview presence': ['count', 'sum']
+    }).round(2)
+    
+    territory_rates.columns = ['Total_Records', 'AI_Present_Count']
+    territory_rates['AI_Rate_Percent'] = (territory_rates['AI_Present_Count'] / territory_rates['Total_Records'] * 100).round(2)
+    territory_rates = territory_rates.reset_index().sort_values('AI_Rate_Percent', ascending=False)
+    
+    # Get top 15 territories by record count
+    top_territories = territory_rates.nlargest(15, 'Total_Records')
+    
+    # Calculation 2: AI Overview distribution for top territories
+    ai_only_expanded = expanded_df[expanded_df['AI Overview presence'] == True]
+    territory_distribution = ai_only_expanded['SOS_territory_expanded'].value_counts(normalize=True) * 100
+    territory_distribution_df = territory_distribution.reset_index()
+    territory_distribution_df.columns = ['SOS_territory_expanded', 'AI_Distribution_Percent']
+    territory_distribution_df['AI_Distribution_Percent'] = territory_distribution_df['AI_Distribution_Percent'].round(1)
+    
+    # Filter to top territories for distribution too
+    territory_distribution_top = territory_distribution_df[
+        territory_distribution_df['SOS_territory_expanded'].isin(top_territories['SOS_territory_expanded'])
+    ]
+    
+    # Merge both calculations
+    territory_combined = top_territories.merge(territory_distribution_df, on='SOS_territory_expanded', how='left')
+    
+    # Create visualizations
+    fig1 = px.bar(
+        top_territories,
+        x='SOS_territory_expanded',
+        y='AI_Rate_Percent',
+        title="AI Overview Rate by SOS Territory (Top 15)<br><sub>What % of each territory's records have AI Overview</sub>",
+        color='AI_Rate_Percent',
+        color_continuous_scale='Purples',
+        text='AI_Rate_Percent'
+    )
+    fig1.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+    fig1.update_layout(height=400, showlegend=False, xaxis_tickangle=-45)
+    
+    fig2 = px.bar(
+        territory_distribution_top,
+        x='SOS_territory_expanded',
+        y='AI_Distribution_Percent',
+        title="AI Overview Distribution by SOS Territory (Top 15)<br><sub>Of all AI Overview records, what % belong to each territory</sub>",
+        color='AI_Distribution_Percent',
+        color_continuous_scale='Viridis',
+        text='AI_Distribution_Percent'
+    )
+    fig2.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+    fig2.update_layout(height=400, showlegend=False, xaxis_tickangle=-45)
+    
+    return fig1, fig2, territory_combined
+
+def create_keyword_in_sos_analysis(df):
+    """Create analysis by Keyword_in_SOS_Queries - both calculations"""
+    if 'Keyword_in_SOS_Queries' not in df.columns:
+        return None, None, None
+    
+    # Calculation 1: AI Overview rate per Keyword_in_SOS_Queries
+    keyword_sos_rates = df.groupby('Keyword_in_SOS_Queries').agg({
+        'AI Overview presence': ['count', 'sum']
+    }).round(2)
+    
+    keyword_sos_rates.columns = ['Total_Records', 'AI_Present_Count']
+    keyword_sos_rates['AI_Rate_Percent'] = (keyword_sos_rates['AI_Present_Count'] / keyword_sos_rates['Total_Records'] * 100).round(2)
+    keyword_sos_rates = keyword_sos_rates.reset_index().sort_values('AI_Rate_Percent', ascending=False)
+    
+    # Calculation 2: AI Overview distribution
+    ai_only_df = df[df['AI Overview presence'] == True]
+    keyword_sos_distribution = ai_only_df['Keyword_in_SOS_Queries'].value_counts(normalize=True) * 100
+    keyword_sos_distribution_df = keyword_sos_distribution.reset_index()
+    keyword_sos_distribution_df.columns = ['Keyword_in_SOS_Queries', 'AI_Distribution_Percent']
+    keyword_sos_distribution_df['AI_Distribution_Percent'] = keyword_sos_distribution_df['AI_Distribution_Percent'].round(1)
+    
+    # Merge both calculations
+    keyword_sos_combined = keyword_sos_rates.merge(keyword_sos_distribution_df, on='Keyword_in_SOS_Queries', how='left')
+    
+    # Create visualizations
+    fig1 = px.bar(
+        keyword_sos_rates,
+        x='Keyword_in_SOS_Queries',
+        y='AI_Rate_Percent',
+        title="AI Overview Rate by Keyword in SOS Queries<br><sub>What % of each group's records have AI Overview</sub>",
+        color='AI_Rate_Percent',
+        color_continuous_scale='Teal',
+        text='AI_Rate_Percent'
+    )
+    fig1.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+    fig1.update_layout(height=400, showlegend=False)
+    
+    fig2 = px.bar(
+        keyword_sos_distribution_df,
+        x='Keyword_in_SOS_Queries',
+        y='AI_Distribution_Percent',
+        title="AI Overview Distribution by Keyword in SOS Queries<br><sub>Of all AI Overview records, what % belong to each group</sub>",
+        color='AI_Distribution_Percent',
+        color_continuous_scale='Magma',
+        text='AI_Distribution_Percent'
+    )
+    fig2.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+    fig2.update_layout(height=400, showlegend=False)
+    
+    return fig1, fig2, keyword_sos_combined
+
 def main():
     # Password protection
     if 'authenticated' not in st.session_state:
@@ -502,6 +730,78 @@ def main():
         st.plotly_chart(serp_fig, use_container_width=True)
         with st.expander("SERP Features Data Table"):
             st.dataframe(serp_data, use_container_width=True)
+    
+    # New SOS Analysis Section
+    st.header("🎯 SOS (Share of Search) Analysis")
+    
+    # SOS Query Type Analysis
+    sos_query_fig1, sos_query_fig2, sos_query_data = create_sos_query_type_analysis(filtered_df)
+    if sos_query_fig1:
+        st.subheader("📋 AI Overview by SOS Query Type")
+        st.info("💡 **Two Different Calculations Explained:**\n"
+                "- **Rate**: What % of each query type's records have AI Overview\n"
+                "- **Distribution**: Of all AI Overview records, what % belong to each query type")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.plotly_chart(sos_query_fig1, use_container_width=True)
+        with col2:
+            st.plotly_chart(sos_query_fig2, use_container_width=True)
+        
+        with st.expander("📋 SOS Query Type Data Table"):
+            st.dataframe(sos_query_data, use_container_width=True)
+    
+    # SOS Category Analysis
+    sos_category_fig1, sos_category_fig2, sos_category_data = create_sos_category_analysis(filtered_df)
+    if sos_category_fig1:
+        st.subheader("🏷️ AI Overview by SOS Category")
+        st.info("💡 **Two Different Calculations Explained:**\n"
+                "- **Rate**: What % of each category's records have AI Overview\n"
+                "- **Distribution**: Of all AI Overview records, what % belong to each category")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.plotly_chart(sos_category_fig1, use_container_width=True)
+        with col2:
+            st.plotly_chart(sos_category_fig2, use_container_width=True)
+        
+        with st.expander("📋 SOS Category Data Table"):
+            st.dataframe(sos_category_data, use_container_width=True)
+    
+    # SOS Territory Analysis (handles pipe-separated values)
+    sos_territory_fig1, sos_territory_fig2, sos_territory_data = create_sos_territory_analysis(filtered_df)
+    if sos_territory_fig1:
+        st.subheader("🗺️ AI Overview by SOS Territory")
+        st.info("💡 **Two Different Calculations Explained:**\n"
+                "- **Rate**: What % of each territory's records have AI Overview\n"
+                "- **Distribution**: Of all AI Overview records, what % belong to each territory\n"
+                "- **Note**: Pipe-separated territories are expanded (one record can count for multiple territories)")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.plotly_chart(sos_territory_fig1, use_container_width=True)
+        with col2:
+            st.plotly_chart(sos_territory_fig2, use_container_width=True)
+        
+        with st.expander("📋 SOS Territory Data Table"):
+            st.dataframe(sos_territory_data, use_container_width=True)
+    
+    # Keyword in SOS Queries Analysis
+    keyword_sos_fig1, keyword_sos_fig2, keyword_sos_data = create_keyword_in_sos_analysis(filtered_df)
+    if keyword_sos_fig1:
+        st.subheader("🔍 AI Overview by Keyword in SOS Queries")
+        st.info("💡 **Two Different Calculations Explained:**\n"
+                "- **Rate**: What % of each group's records have AI Overview (True vs False)\n"
+                "- **Distribution**: Of all AI Overview records, what % belong to each group")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.plotly_chart(keyword_sos_fig1, use_container_width=True)
+        with col2:
+            st.plotly_chart(keyword_sos_fig2, use_container_width=True)
+        
+        with st.expander("📋 Keyword in SOS Queries Data Table"):
+            st.dataframe(keyword_sos_data, use_container_width=True)
     
     # Download filtered data
     st.header("💾 Data Export")
