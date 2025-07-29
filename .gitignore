@@ -1,9 +1,12 @@
-# Data files - DO NOT COMMIT
-data/
-*.parquet
+# Data files - DO NOT COMMIT (except sample)
+# data/
+# *.parquet
 *.csv
 *.xlsx
 *.xls
+
+# Allow sample data for Streamlit Cloud
+!data/streamlit_sample.parquet
 
 # Python
 __pycache__/
