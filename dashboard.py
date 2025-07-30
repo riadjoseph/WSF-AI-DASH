@@ -6,6 +6,26 @@ from plotly.subplots import make_subplots
 import numpy as np
 from datetime import datetime
 import warnings
+
+# Optional imports for advanced analytics
+try:
+    import networkx as nx
+    HAS_NETWORKX = True
+except ImportError:
+    HAS_NETWORKX = False
+
+try:
+    from scipy.stats import pearsonr
+    HAS_SCIPY = True
+except ImportError:
+    HAS_SCIPY = False
+
+try:
+    from sklearn.decomposition import seasonal_decompose
+    HAS_SKLEARN = True
+except ImportError:
+    HAS_SKLEARN = False
+
 warnings.filterwarnings('ignore')
 
 # Configure Streamlit page
@@ -96,7 +116,7 @@ def create_ai_overview_by_brand(df):
         text='AI_Rate_Percent'
     )
     fig1.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig1.update_layout(height=400, showlegend=False)
+    fig1.update_layout(height=700, showlegend=False)
     
     fig2 = px.bar(
         brand_combined,
@@ -108,7 +128,7 @@ def create_ai_overview_by_brand(df):
         text='AI_Distribution_Percent'
     )
     fig2.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig2.update_layout(height=400, showlegend=False)
+    fig2.update_layout(height=700, showlegend=False)
     
     return fig1, fig2, brand_combined
 
@@ -145,7 +165,7 @@ def create_ai_overview_by_country(df):
         text='AI_Rate_Percent'
     )
     fig1.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig1.update_layout(height=400, showlegend=False, xaxis_tickangle=-45)
+    fig1.update_layout(height=700, showlegend=False, xaxis_tickangle=-45)
     
     fig2 = px.bar(
         country_distribution_df,
@@ -157,7 +177,7 @@ def create_ai_overview_by_country(df):
         text='AI_Distribution_Percent'
     )
     fig2.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig2.update_layout(height=400, showlegend=False, xaxis_tickangle=-45)
+    fig2.update_layout(height=700, showlegend=False, xaxis_tickangle=-45)
     
     return fig1, fig2, country_combined
 
@@ -186,7 +206,7 @@ def create_ai_overview_by_position(df):
         text='AI_Percentage'
     )
     fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig.update_layout(height=400, showlegend=False)
+    fig.update_layout(height=700, showlegend=False)
     return fig, position_ai
 
 def create_ai_overview_search_volume_analysis(df):
@@ -215,7 +235,7 @@ def create_ai_overview_search_volume_analysis(df):
         text='AI_Percentage'
     )
     fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig.update_layout(height=400, showlegend=False)
+    fig.update_layout(height=700, showlegend=False)
     return fig, volume_ai
 
 def create_ai_overview_trends(df):
@@ -240,7 +260,7 @@ def create_ai_overview_trends(df):
         title="AI Overview Presence Trends Over Time by Country (%)",
         markers=True
     )
-    fig.update_layout(height=500, xaxis_tickangle=-45)
+    fig.update_layout(height=700, xaxis_tickangle=-45)
     return fig
 
 def create_position_type_analysis(df):
@@ -266,7 +286,7 @@ def create_position_type_analysis(df):
         text='AI_Percentage'
     )
     fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig.update_layout(height=400, showlegend=False, xaxis_tickangle=-45)
+    fig.update_layout(height=700, showlegend=False, xaxis_tickangle=-45)
     return fig, pos_type_ai
 
 def create_keyword_intents_analysis(df):
@@ -292,7 +312,7 @@ def create_keyword_intents_analysis(df):
         text='AI_Percentage'
     )
     fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig.update_layout(height=400, showlegend=False, xaxis_tickangle=-45)
+    fig.update_layout(height=700, showlegend=False, xaxis_tickangle=-45)
     return fig, intent_ai
 
 def create_serp_features_analysis(df):
@@ -325,7 +345,7 @@ def create_serp_features_analysis(df):
         text='AI_Percentage'
     )
     fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig.update_layout(height=500, showlegend=False, xaxis_tickangle=-45)
+    fig.update_layout(height=700, showlegend=False, xaxis_tickangle=-45)
     return fig, serp_ai
 
 def create_sos_query_type_analysis(df):
@@ -363,7 +383,7 @@ def create_sos_query_type_analysis(df):
         text='AI_Rate_Percent'
     )
     fig1.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig1.update_layout(height=400, showlegend=False)
+    fig1.update_layout(height=700, showlegend=False)
     
     fig2 = px.bar(
         query_type_distribution_df,
@@ -375,7 +395,7 @@ def create_sos_query_type_analysis(df):
         text='AI_Distribution_Percent'
     )
     fig2.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig2.update_layout(height=400, showlegend=False)
+    fig2.update_layout(height=700, showlegend=False)
     
     return fig1, fig2, query_type_combined
 
@@ -414,7 +434,7 @@ def create_sos_category_analysis(df):
         text='AI_Rate_Percent'
     )
     fig1.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig1.update_layout(height=400, showlegend=False, xaxis_tickangle=-45)
+    fig1.update_layout(height=700, showlegend=False, xaxis_tickangle=-45)
     
     fig2 = px.bar(
         category_distribution_df,
@@ -426,7 +446,7 @@ def create_sos_category_analysis(df):
         text='AI_Distribution_Percent'
     )
     fig2.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig2.update_layout(height=400, showlegend=False, xaxis_tickangle=-45)
+    fig2.update_layout(height=700, showlegend=False, xaxis_tickangle=-45)
     
     return fig1, fig2, category_combined
 
@@ -489,7 +509,7 @@ def create_sos_territory_analysis(df):
         text='AI_Rate_Percent'
     )
     fig1.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig1.update_layout(height=400, showlegend=False, xaxis_tickangle=-45)
+    fig1.update_layout(height=700, showlegend=False, xaxis_tickangle=-45)
     
     fig2 = px.bar(
         territory_distribution_top,
@@ -501,7 +521,7 @@ def create_sos_territory_analysis(df):
         text='AI_Distribution_Percent'
     )
     fig2.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig2.update_layout(height=400, showlegend=False, xaxis_tickangle=-45)
+    fig2.update_layout(height=700, showlegend=False, xaxis_tickangle=-45)
     
     return fig1, fig2, territory_combined
 
@@ -540,7 +560,7 @@ def create_keyword_in_sos_analysis(df):
         text='AI_Rate_Percent'
     )
     fig1.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig1.update_layout(height=400, showlegend=False)
+    fig1.update_layout(height=700, showlegend=False)
     
     fig2 = px.bar(
         keyword_sos_distribution_df,
@@ -552,29 +572,372 @@ def create_keyword_in_sos_analysis(df):
         text='AI_Distribution_Percent'
     )
     fig2.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    fig2.update_layout(height=400, showlegend=False)
+    fig2.update_layout(height=700, showlegend=False)
     
     return fig1, fig2, keyword_sos_combined
 
-def main():
-    # Password protection
-    if 'authenticated' not in st.session_state:
-        st.session_state.authenticated = False
+# ===== NEW ANALYSIS FUNCTIONS =====
+
+def create_ai_overview_keyword_complexity_analysis(df):
+    """AI Overview presence by keyword length/complexity"""
+    if 'Keyword' not in df.columns:
+        return None, None
     
-    if not st.session_state.authenticated:
-        st.title("🔐 AI Overview Analytics Dashboard")
-        st.markdown("Please enter the password to access the dashboard")
+    # Calculate keyword metrics
+    df_copy = df.copy()
+    df_copy['keyword_length'] = df_copy['Keyword'].str.len()
+    df_copy['word_count'] = df_copy['Keyword'].str.split().str.len()
+    df_copy['complexity_score'] = df_copy['keyword_length'] * df_copy['word_count']
+    
+    # Create complexity bins
+    df_copy['complexity_bin'] = pd.cut(df_copy['complexity_score'], 
+                                     bins=5, labels=['Very Low', 'Low', 'Medium', 'High', 'Very High'])
+    
+    complexity_ai = df_copy.groupby('complexity_bin').agg({
+        'AI Overview presence': ['count', 'sum']
+    })
+    complexity_ai.columns = ['Total_Records', 'AI_Present_Count']
+    complexity_ai['AI_Percentage'] = (complexity_ai['AI_Present_Count'] / complexity_ai['Total_Records'] * 100).round(2)
+    complexity_ai = complexity_ai.reset_index()
+    
+    fig = px.bar(complexity_ai, x='complexity_bin', y='AI_Percentage',
+                 title="AI Overview Presence by Keyword Complexity",
+                 color='AI_Percentage', color_continuous_scale='Blues',
+                 text='AI_Percentage')
+    fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+    fig.update_layout(height=700, showlegend=False)
+    
+    return fig, complexity_ai
+
+def create_ai_overview_search_volume_correlation(df):
+    """AI Overview correlation with search volume ranges"""
+    volume_ranges = [(0, 100), (101, 500), (501, 1000), (1001, 5000), (5001, float('inf'))]
+    volume_labels = ['0-100', '101-500', '501-1K', '1K-5K', '5K+']
+    
+    correlation_data = []
+    for i, (min_vol, max_vol) in enumerate(volume_ranges):
+        if max_vol == float('inf'):
+            subset = df[df['Search Volume'] >= min_vol]
+        else:
+            subset = df[(df['Search Volume'] >= min_vol) & (df['Search Volume'] <= max_vol)]
         
-        password = st.text_input("Password:", type="password")
-        
-        if st.button("Login"):
-            if password == "wsfseoteam":
-                st.session_state.authenticated = True
-                st.success("Access granted! Refreshing dashboard...")
-                st.rerun()
-            else:
-                st.error("Incorrect password. Please try again.")
-        return
+        if len(subset) > 0:
+            ai_rate = (subset['AI Overview presence'].sum() / len(subset)) * 100
+            correlation_data.append({
+                'Volume_Range': volume_labels[i],
+                'AI_Rate': ai_rate,
+                'Record_Count': len(subset)
+            })
+    
+    corr_df = pd.DataFrame(correlation_data)
+    
+    fig = px.scatter(corr_df, x='Volume_Range', y='AI_Rate', size='Record_Count',
+                     title="AI Overview Rate vs Search Volume Ranges",
+                     hover_data=['Record_Count'])
+    fig.update_layout(height=700)
+    
+    return fig, corr_df
+
+def create_ai_overview_day_of_week_analysis(df):
+    """AI Overview by day of week/seasonality patterns"""
+    if 'Month' not in df.columns or df['Month'].isna().all():
+        return None, None
+    
+    df_copy = df.copy()
+    df_copy['day_of_week'] = pd.to_datetime(df_copy['Month']).dt.day_name()
+    df_copy['month_name'] = pd.to_datetime(df_copy['Month']).dt.month_name()
+    
+    # Day of week analysis
+    dow_ai = df_copy.groupby('day_of_week').agg({
+        'AI Overview presence': ['count', 'sum']
+    })
+    dow_ai.columns = ['Total_Records', 'AI_Present_Count']
+    dow_ai['AI_Percentage'] = (dow_ai['AI_Present_Count'] / dow_ai['Total_Records'] * 100).round(2)
+    dow_ai = dow_ai.reset_index()
+    
+    # Order by days of week
+    day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    dow_ai['day_of_week'] = pd.Categorical(dow_ai['day_of_week'], categories=day_order, ordered=True)
+    dow_ai = dow_ai.sort_values('day_of_week')
+    
+    fig = px.bar(dow_ai, x='day_of_week', y='AI_Percentage',
+                 title="AI Overview Presence by Day of Week",
+                 color='AI_Percentage', color_continuous_scale='Viridis',
+                 text='AI_Percentage')
+    fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+    fig.update_layout(height=700, showlegend=False)
+    
+    return fig, dow_ai
+
+def create_ai_overview_position_scatter(df):
+    """AI Overview vs organic position scatter plot"""
+    sample_df = df.sample(min(10000, len(df)), random_state=42)  # Sample for performance
+    
+    fig = px.scatter(sample_df, x='Position', y='AI Overview presence',
+                     color='brand', opacity=0.6,
+                     title="AI Overview vs Organic Position Scatter Plot",
+                     hover_data=['Search Volume', 'Traffic'])
+    fig.update_layout(height=700)
+    
+    return fig
+
+def create_position_distribution_histograms(df):
+    """Position distribution histograms by brand"""
+    fig = px.histogram(df, x='Position', color='brand', 
+                       title="Position Distribution by Brand",
+                       nbins=50, opacity=0.7)
+    fig.update_layout(height=700, barmode='overlay')
+    
+    return fig
+
+def create_traffic_position_correlation(df):
+    """Traffic vs Position correlation charts"""
+    if 'Traffic' not in df.columns:
+        return None, None
+    
+    # Sample for performance
+    sample_df = df.sample(min(5000, len(df)), random_state=42)
+    
+    fig = px.scatter(sample_df, x='Position', y='Traffic', color='brand',
+                     title="Traffic vs Position Correlation",
+                     hover_data=['Search Volume', 'AI Overview presence'],
+                     opacity=0.6)
+    fig.update_layout(height=700)
+    
+    # Calculate correlation coefficient
+    correlation_stats = None
+    if HAS_SCIPY:
+        valid_data = sample_df[['Position', 'Traffic']].dropna()
+        if len(valid_data) > 1:
+            corr_coef, p_value = pearsonr(valid_data['Position'], valid_data['Traffic'])
+            correlation_stats = {'correlation': corr_coef, 'p_value': p_value}
+    
+    return fig, correlation_stats
+
+def create_serp_features_network(df):
+    """SERP features co-occurrence network"""
+    if 'SERP Features by Keyword' not in df.columns:
+        return None
+    
+    # Get top 20 most common SERP features for network analysis
+    top_features = df['SERP Features by Keyword'].value_counts().head(20).index
+    df_filtered = df[df['SERP Features by Keyword'].isin(top_features)]
+    
+    # Create co-occurrence matrix (simplified for visualization)
+    feature_counts = df_filtered['SERP Features by Keyword'].value_counts()
+    
+    # Create a simple network visualization using plotly
+    fig = px.bar(feature_counts.head(15), 
+                 title="Top SERP Features Co-occurrence",
+                 labels={'index': 'SERP Features', 'value': 'Frequency'})
+    fig.update_layout(height=700, xaxis_tickangle=-45)
+    
+    return fig
+
+def create_position_type_performance(df):
+    """Position Type performance comparison"""
+    if 'Position Type' not in df.columns:
+        return None, None
+    
+    pos_type_stats = df.groupby('Position Type').agg({
+        'Position': 'mean',
+        'Search Volume': 'mean',
+        'Traffic': 'mean',
+        'AI Overview presence': lambda x: (x.sum() / len(x)) * 100
+    }).round(2)
+    
+    pos_type_stats.columns = ['Avg_Position', 'Avg_Search_Volume', 'Avg_Traffic', 'AI_Overview_Rate']
+    pos_type_stats = pos_type_stats.reset_index()
+    
+    # Create multi-metric comparison
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    
+    fig.add_trace(
+        go.Bar(x=pos_type_stats['Position Type'], y=pos_type_stats['Avg_Position'],
+               name='Avg Position', marker_color='lightblue'),
+        secondary_y=False,
+    )
+    
+    fig.add_trace(
+        go.Scatter(x=pos_type_stats['Position Type'], y=pos_type_stats['AI_Overview_Rate'],
+                   mode='lines+markers', name='AI Overview Rate (%)', marker_color='red'),
+        secondary_y=True,
+    )
+    
+    fig.update_xaxes(title_text="Position Type")
+    fig.update_yaxes(title_text="Average Position", secondary_y=False)
+    fig.update_yaxes(title_text="AI Overview Rate (%)", secondary_y=True)
+    fig.update_layout(title_text="Position Type Performance Comparison", height=700)
+    
+    return fig, pos_type_stats
+
+def create_brand_market_share_over_time(df):
+    """Brand market share over time"""
+    if 'Month' not in df.columns or df['Month'].isna().all():
+        return None, None
+    
+    monthly_brand_share = df.groupby(['Month', 'brand']).size().reset_index(name='Record_Count')
+    monthly_totals = monthly_brand_share.groupby('Month')['Record_Count'].sum().reset_index()
+    monthly_totals.columns = ['Month', 'Total_Records']
+    
+    monthly_brand_share = monthly_brand_share.merge(monthly_totals, on='Month')
+    monthly_brand_share['Market_Share'] = (monthly_brand_share['Record_Count'] / monthly_brand_share['Total_Records']) * 100
+    
+    fig = px.line(monthly_brand_share, x='Month', y='Market_Share', color='brand',
+                  title="Brand Market Share Over Time (%)",
+                  markers=True)
+    fig.update_layout(height=700)
+    
+    return fig, monthly_brand_share
+
+def create_competitive_position_analysis(df):
+    """Competitive position analysis"""
+    brand_position_stats = df.groupby('brand').agg({
+        'Position': ['mean', 'median', 'std'],
+        'Search Volume': 'sum',
+        'Traffic': 'sum',
+        'AI Overview presence': lambda x: (x.sum() / len(x)) * 100
+    }).round(2)
+    
+    brand_position_stats.columns = ['Avg_Position', 'Median_Position', 'Position_Std', 
+                                   'Total_Search_Volume', 'Total_Traffic', 'AI_Overview_Rate']
+    brand_position_stats = brand_position_stats.reset_index()
+    
+    fig = px.scatter(brand_position_stats, x='Avg_Position', y='AI_Overview_Rate',
+                     size='Total_Search_Volume', color='brand',
+                     title="Competitive Position Analysis (Avg Position vs AI Overview Rate)",
+                     hover_data=['Median_Position', 'Total_Traffic'])
+    fig.update_layout(height=700)
+    
+    return fig, brand_position_stats
+
+def create_search_volume_trends_by_brand(df):
+    """Search volume trends by brand"""
+    if 'Month' not in df.columns or df['Month'].isna().all():
+        return None, None
+    
+    monthly_volume = df.groupby(['Month', 'brand'])['Search Volume'].sum().reset_index()
+    
+    fig = px.line(monthly_volume, x='Month', y='Search Volume', color='brand',
+                  title="Search Volume Trends by Brand",
+                  markers=True)
+    fig.update_layout(height=700)
+    
+    return fig, monthly_volume
+
+def create_geographic_heatmap(df):
+    """Geographic heat maps"""
+    country_stats = df.groupby('country').agg({
+        'AI Overview presence': lambda x: (x.sum() / len(x)) * 100,
+        'Position': 'mean',
+        'Search Volume': 'sum'
+    }).round(2)
+    
+    country_stats.columns = ['AI_Overview_Rate', 'Avg_Position', 'Total_Search_Volume']
+    country_stats = country_stats.reset_index()
+    
+    fig = px.choropleth(country_stats, 
+                        locations='country',
+                        color='AI_Overview_Rate',
+                        hover_data=['Avg_Position', 'Total_Search_Volume'],
+                        color_continuous_scale='Viridis',
+                        title="AI Overview Rate by Country (Geographic Heatmap)")
+    fig.update_layout(height=700)
+    
+    return fig, country_stats
+
+def create_keyword_intent_performance_matrix(df):
+    """Keyword intent performance matrix"""
+    if 'Keyword Intents' not in df.columns:
+        return None, None
+    
+    intent_matrix = df.groupby('Keyword Intents').agg({
+        'Position': 'mean',
+        'Search Volume': 'mean',
+        'Traffic': 'mean',
+        'AI Overview presence': lambda x: (x.sum() / len(x)) * 100
+    }).round(2)
+    
+    intent_matrix.columns = ['Avg_Position', 'Avg_Search_Volume', 'Avg_Traffic', 'AI_Overview_Rate']
+    intent_matrix = intent_matrix.reset_index()
+    
+    fig = px.scatter(intent_matrix, x='Avg_Position', y='AI_Overview_Rate',
+                     size='Avg_Search_Volume', color='Keyword Intents',
+                     title="Keyword Intent Performance Matrix",
+                     hover_data=['Avg_Traffic'])
+    fig.update_layout(height=700)
+    
+    return fig, intent_matrix
+
+def create_traffic_efficiency_by_position(df):
+    """Traffic efficiency by position ranges"""
+    if 'Traffic' not in df.columns:
+        return None, None
+    
+    df_copy = df.copy()
+    df_copy['Position_Range'] = pd.cut(df_copy['Position'], 
+                                     bins=[0, 3, 10, 20, 50, 100],
+                                     labels=['1-3', '4-10', '11-20', '21-50', '51-100'])
+    
+    efficiency_stats = df_copy.groupby('Position_Range').agg({
+        'Traffic': 'sum',
+        'Search Volume': 'sum'
+    })
+    efficiency_stats['Traffic_Efficiency'] = (efficiency_stats['Traffic'] / efficiency_stats['Search Volume']) * 100
+    efficiency_stats = efficiency_stats.reset_index()
+    
+    fig = px.bar(efficiency_stats, x='Position_Range', y='Traffic_Efficiency',
+                 title="Traffic Efficiency by Position Range (%)",
+                 color='Traffic_Efficiency', color_continuous_scale='Blues',
+                 text='Traffic_Efficiency')
+    fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+    fig.update_layout(height=700, showlegend=False)
+    
+    return fig, efficiency_stats
+
+def create_brand_cannibalization_analysis(df):
+    """Brand cannibalization analysis"""
+    brand_keyword_overlap = df.groupby('brand')['Keyword'].nunique().reset_index()
+    brand_keyword_overlap.columns = ['brand', 'Unique_Keywords']
+    
+    total_keywords = df['Keyword'].nunique()
+    brand_keyword_overlap['Keyword_Share'] = (brand_keyword_overlap['Unique_Keywords'] / total_keywords) * 100
+    
+    fig = px.pie(brand_keyword_overlap, values='Keyword_Share', names='brand',
+                 title="Brand Keyword Share (Potential Cannibalization)")
+    fig.update_layout(height=700)
+    
+    return fig, brand_keyword_overlap
+
+def create_seasonal_trend_decomposition(df):
+    """Seasonal trend decomposition"""
+    if 'Month' not in df.columns or df['Month'].isna().all():
+        return None, None
+    
+    monthly_ai_rate = df.groupby('Month').agg({
+        'AI Overview presence': lambda x: (x.sum() / len(x)) * 100
+    }).reset_index()
+    monthly_ai_rate.columns = ['Month', 'AI_Rate']
+    
+    if len(monthly_ai_rate) < 12:  # Need at least 12 months for seasonal decomposition
+        fig = px.line(monthly_ai_rate, x='Month', y='AI_Rate',
+                      title="AI Overview Rate Trend (Insufficient data for seasonal decomposition)")
+        fig.update_layout(height=700)
+        return fig, monthly_ai_rate
+    
+    # Simple trend analysis instead of full seasonal decomposition
+    monthly_ai_rate['Month_Num'] = pd.to_datetime(monthly_ai_rate['Month']).dt.month
+    monthly_seasonal = monthly_ai_rate.groupby('Month_Num')['AI_Rate'].mean().reset_index()
+    
+    fig = px.line(monthly_seasonal, x='Month_Num', y='AI_Rate',
+                  title="Seasonal AI Overview Rate Pattern (Average by Month)",
+                  markers=True)
+    fig.update_layout(height=700)
+    fig.update_xaxes(title="Month of Year")
+    
+    return fig, monthly_seasonal
+
+def main():
     
     st.title("🤖 AI Overview Analytics Dashboard")
     st.markdown("Comprehensive analysis of AI Overview presence across brands, countries, and search characteristics")
@@ -802,6 +1165,146 @@ def main():
         
         with st.expander("📋 Keyword in SOS Queries Data Table"):
             st.dataframe(keyword_sos_data, use_container_width=True)
+    
+    # ===== NEW DASHBOARD SECTIONS =====
+    
+    # AI Overview Focus Section
+    st.header("🤖 AI Overview Focus")
+    st.markdown("**Detailed AI Overview analysis with advanced metrics**")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("By Keyword Complexity")
+        complexity_fig, complexity_data = create_ai_overview_keyword_complexity_analysis(filtered_df)
+        if complexity_fig:
+            st.plotly_chart(complexity_fig, use_container_width=True)
+            with st.expander("Keyword Complexity Data"):
+                st.dataframe(complexity_data, use_container_width=True)
+        
+        st.subheader("Day of Week Patterns")
+        dow_fig, dow_data = create_ai_overview_day_of_week_analysis(filtered_df)
+        if dow_fig:
+            st.plotly_chart(dow_fig, use_container_width=True)
+            with st.expander("Day of Week Data"):
+                st.dataframe(dow_data, use_container_width=True)
+    
+    with col2:
+        st.subheader("Search Volume Correlation")
+        corr_fig, corr_data = create_ai_overview_search_volume_correlation(filtered_df)
+        if corr_fig:
+            st.plotly_chart(corr_fig, use_container_width=True)
+            with st.expander("Correlation Data"):
+                st.dataframe(corr_data, use_container_width=True)
+        
+        st.subheader("Position Scatter Plot")
+        scatter_fig = create_ai_overview_position_scatter(filtered_df)
+        if scatter_fig:
+            st.plotly_chart(scatter_fig, use_container_width=True)
+    
+    # SERP Analysis Section
+    st.header("📊 SERP Analysis")
+    st.markdown("**Comprehensive SERP feature and position analysis**")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Position Distribution by Brand")
+        hist_fig = create_position_distribution_histograms(filtered_df)
+        if hist_fig:
+            st.plotly_chart(hist_fig, use_container_width=True)
+        
+        st.subheader("SERP Features Network")
+        network_fig = create_serp_features_network(filtered_df)
+        if network_fig:
+            st.plotly_chart(network_fig, use_container_width=True)
+    
+    with col2:
+        st.subheader("Traffic vs Position Correlation")
+        traffic_fig, traffic_corr = create_traffic_position_correlation(filtered_df)
+        if traffic_fig:
+            st.plotly_chart(traffic_fig, use_container_width=True)
+            if traffic_corr:
+                st.info(f"**Correlation Coefficient:** {traffic_corr['correlation']:.3f} (p-value: {traffic_corr['p_value']:.3f})")
+        
+        st.subheader("Position Type Performance")
+        pos_type_fig, pos_type_data = create_position_type_performance(filtered_df)
+        if pos_type_fig:
+            st.plotly_chart(pos_type_fig, use_container_width=True)
+            with st.expander("Position Type Performance Data"):
+                st.dataframe(pos_type_data, use_container_width=True)
+    
+    # Business Intelligence Section
+    st.header("📈 Business Intelligence")
+    st.markdown("**Market share, competitive analysis, and business insights**")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Brand Market Share Over Time")
+        market_share_fig, market_share_data = create_brand_market_share_over_time(filtered_df)
+        if market_share_fig:
+            st.plotly_chart(market_share_fig, use_container_width=True)
+            with st.expander("Market Share Data"):
+                st.dataframe(market_share_data, use_container_width=True)
+        
+        st.subheader("Search Volume Trends by Brand")
+        volume_trends_fig, volume_trends_data = create_search_volume_trends_by_brand(filtered_df)
+        if volume_trends_fig:
+            st.plotly_chart(volume_trends_fig, use_container_width=True)
+            with st.expander("Search Volume Trends Data"):
+                st.dataframe(volume_trends_data, use_container_width=True)
+    
+    with col2:
+        st.subheader("Competitive Position Analysis")
+        comp_analysis_fig, comp_analysis_data = create_competitive_position_analysis(filtered_df)
+        if comp_analysis_fig:
+            st.plotly_chart(comp_analysis_fig, use_container_width=True)
+            with st.expander("Competitive Analysis Data"):
+                st.dataframe(comp_analysis_data, use_container_width=True)
+        
+        st.subheader("Geographic Heatmap")
+        geo_fig, geo_data = create_geographic_heatmap(filtered_df)
+        if geo_fig:
+            st.plotly_chart(geo_fig, use_container_width=True)
+            with st.expander("Geographic Data"):
+                st.dataframe(geo_data, use_container_width=True)
+    
+    # Advanced Analytics Section
+    st.header("🔬 Advanced Analytics")
+    st.markdown("**Advanced performance metrics and trend analysis**")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Keyword Intent Performance Matrix")
+        intent_matrix_fig, intent_matrix_data = create_keyword_intent_performance_matrix(filtered_df)
+        if intent_matrix_fig:
+            st.plotly_chart(intent_matrix_fig, use_container_width=True)
+            with st.expander("Intent Performance Data"):
+                st.dataframe(intent_matrix_data, use_container_width=True)
+        
+        st.subheader("Brand Cannibalization Analysis")
+        cannib_fig, cannib_data = create_brand_cannibalization_analysis(filtered_df)
+        if cannib_fig:
+            st.plotly_chart(cannib_fig, use_container_width=True)
+            with st.expander("Cannibalization Data"):
+                st.dataframe(cannib_data, use_container_width=True)
+    
+    with col2:
+        st.subheader("Traffic Efficiency by Position")
+        efficiency_fig, efficiency_data = create_traffic_efficiency_by_position(filtered_df)
+        if efficiency_fig:
+            st.plotly_chart(efficiency_fig, use_container_width=True)
+            with st.expander("Traffic Efficiency Data"):
+                st.dataframe(efficiency_data, use_container_width=True)
+        
+        st.subheader("Seasonal Trend Decomposition")
+        seasonal_fig, seasonal_data = create_seasonal_trend_decomposition(filtered_df)
+        if seasonal_fig:
+            st.plotly_chart(seasonal_fig, use_container_width=True)
+            with st.expander("Seasonal Data"):
+                st.dataframe(seasonal_data, use_container_width=True)
     
     # Download filtered data
     st.header("💾 Data Export")
